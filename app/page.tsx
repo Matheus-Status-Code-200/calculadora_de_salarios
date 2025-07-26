@@ -71,32 +71,7 @@ export default function CalculatorPage() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
             {/* Mode Selector */}
-            <div className="bg-gray-50 dark:bg-gray-700 px-8 py-6 border-b border-gray-200 dark:border-gray-600">
-              <div className="flex justify-center">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
-                  <button
-                    onClick={() => handleModeChange("single")}
-                    className={`px-6 py-3 rounded-md font-medium transition-all duration-200 ${
-                      mode === "single"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    Cálculo Único
-                  </button>
-                  <button
-                    onClick={() => handleModeChange("compare")}
-                    className={`px-6 py-3 rounded-md font-medium transition-all duration-200 ${
-                      mode === "compare"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    Comparar Cenários
-                  </button>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Calculator Form */}
             <div className="p-8">
