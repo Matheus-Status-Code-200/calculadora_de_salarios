@@ -147,19 +147,21 @@ export default function CalculatorForm() {
     <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Calculadora Trabalhista Completa</h1>
-        <p className="text-gray-600">Analise e compare cenários de carreira com todos os detalhes</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Calculadora Trabalhista Completa</h1>
+        <p className="text-gray-600 dark:text-gray-300">Analise e compare cenários de carreira com todos os detalhes</p>
       </div>
 
       {/* Mode Selector */}
-      <Card>
+      <Card className="dark:bg-gray-800 dark:border-gray-700">
         <CardContent className="p-6">
           <div className="flex justify-center">
-            <div className="inline-flex rounded-lg border border-gray-200 p-1">
+            <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 p-1">
               <button
                 onClick={() => setMode("single")}
                 className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  mode === "single" ? "bg-blue-600 text-white" : "text-gray-600 hover:text-gray-900"
+                  mode === "single"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 }`}
               >
                 Cálculo Único
@@ -167,7 +169,9 @@ export default function CalculatorForm() {
               <button
                 onClick={() => setMode("compare")}
                 className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  mode === "compare" ? "bg-blue-600 text-white" : "text-gray-600 hover:text-gray-900"
+                  mode === "compare"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 }`}
               >
                 Comparar Cenários
@@ -178,10 +182,10 @@ export default function CalculatorForm() {
       </Card>
 
       {/* Period Input */}
-      <Card>
+      <Card className="dark:bg-gray-800 dark:border-gray-700">
         <CardContent className="p-6">
           <div className="max-w-md mx-auto">
-            <label htmlFor="period" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="period" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Período de cálculo (anos)
             </label>
             <input
@@ -192,10 +196,10 @@ export default function CalculatorForm() {
               step="1"
               value={period}
               onChange={(e) => handlePeriodChange(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
               placeholder="Ex: 10"
             />
-            <p className="text-xs text-gray-500 mt-1">Entre 1 e 80 anos</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Entre 1 e 80 anos</p>
           </div>
         </CardContent>
       </Card>
@@ -224,9 +228,9 @@ export default function CalculatorForm() {
 
       {/* Error Message */}
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-red-800">
+            <div className="flex items-center gap-2 text-red-800 dark:text-red-400">
               <AlertTriangle className="w-5 h-5" />
               <span className="font-medium">{error}</span>
             </div>
@@ -235,10 +239,10 @@ export default function CalculatorForm() {
       )}
 
       {/* Results */}
-      {results && <ResultsDisplay mode={mode} results={results} />}
+      {results && <ResultsDisplay mode={mode} results={results} period={Number.parseInt(period)} />}
 
       {/* Footer */}
-      <div className="text-center text-sm text-gray-500 border-t pt-6">
+      <div className="text-center text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-6">
         <p>Valores de INSS e IRRF baseados nas tabelas de 2025. Esta é uma ferramenta de simulação.</p>
       </div>
     </div>

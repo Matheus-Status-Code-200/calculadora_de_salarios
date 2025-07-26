@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Calculator, TrendingUp, Users } from "lucide-react"
 import CalculatorForm from "@/components/calculator-form"
 import ResultsDisplay from "@/components/results-display"
+import { ThemeToggle } from "@/components/theme-toggle"
 import type { CalculationMode, CalculationInputs, CalculationResults } from "@/types/calculator"
 import { performCalculation } from "@/lib/calculations"
 
@@ -34,22 +35,27 @@ export default function CalculatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 relative">
+          {/* Theme Toggle */}
+          <div className="absolute top-0 right-0">
+            <ThemeToggle />
+          </div>
+
           <div className="flex justify-center items-center gap-3 mb-4">
-            <div className="p-3 bg-blue-600 rounded-full">
+            <div className="p-3 bg-blue-600 dark:bg-blue-500 rounded-full">
               <Calculator className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-800">Calculadora Trabalhista</h1>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 dark:text-gray-100">Calculadora Trabalhista</h1>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Analise e compare cenários de carreira com cálculos precisos de INSS, IRRF, FGTS e benefícios
           </p>
 
           {/* Features */}
-          <div className="flex justify-center gap-8 mt-8 text-sm text-gray-500">
+          <div className="flex justify-center gap-8 mt-8 text-sm text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               <span>Projeções de longo prazo</span>
@@ -63,17 +69,17 @@ export default function CalculatorPage() {
 
         {/* Main Content */}
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
             {/* Mode Selector */}
-            <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
+            <div className="bg-gray-50 dark:bg-gray-700 px-8 py-6 border-b border-gray-200 dark:border-gray-600">
               <div className="flex justify-center">
-                <div className="bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
                   <button
                     onClick={() => handleModeChange("single")}
                     className={`px-6 py-3 rounded-md font-medium transition-all duration-200 ${
                       mode === "single"
                         ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                        : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
                     Cálculo Único
@@ -83,7 +89,7 @@ export default function CalculatorPage() {
                     className={`px-6 py-3 rounded-md font-medium transition-all duration-200 ${
                       mode === "compare"
                         ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                        : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
                     Comparar Cenários
@@ -103,8 +109,8 @@ export default function CalculatorPage() {
         </div>
 
         {/* Footer */}
-        <footer className="text-center mt-12 text-sm text-gray-500">
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 max-w-2xl mx-auto">
+        <footer className="text-center mt-12 text-sm text-gray-500 dark:text-gray-400">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 max-w-2xl mx-auto transition-colors duration-300">
             <p className="font-medium mb-2">⚠️ Importante</p>
             <p>
               Valores de INSS e IRRF baseados nas tabelas de 2025. Esta é uma ferramenta de simulação para fins
