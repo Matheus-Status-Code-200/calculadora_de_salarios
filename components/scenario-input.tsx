@@ -1,217 +1,243 @@
 "use client"
 
-import { Plus, X, DollarSign, Clock, Gift, Users } from "lucide-react"
-import type { CalculationInputs, Benefit } from "@/types/calculator"
+import { useState } from "react"
+import { Plus, X, DollarSign } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 
 interface ScenarioInputProps {
   scenario: number
-  inputs: CalculationInputs
-  onChange: (inputs: CalculationInputs) => void
-  isCompareMode: boolean
+  title: string
 }
 
-export default function ScenarioInput({ scenario, inputs, onChange, isCompareMode }: ScenarioInputProps) {
-  const title = isCompareMode ? `Cenário ${scenario}` : "Dados do Cenário"
-  const colorClasses = scenario === 2 ? "border-teal-200 bg-teal-50" : "border-indigo-200 bg-indigo-50"
-  const accentColor = scenario === 2 ? "teal" : "indigo"
-
-  const updateInputs = (updates: Partial<CalculationInputs>) => {
-    onChange({ ...inputs, ...updates })
-  }
+export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
+  const [salaryType, setSalaryType] = useState<"mensal" | "horista">("mensal")
+  const [calculateDiscounts, setCalculateDiscounts] = useState(false)
+  const [benefits, setBenefits] = useState<
+    Array<{ id: number; name: string; value: string; frequency: "mensal" | "anual" }>
+  >([])
 
   const addBenefit = () => {
-    const newBenefit: Benefit = {
+    const newBenefit = {
+      id: Date.now(),
       name: "",
-      value: 0,
-      frequency: "mensal",
+      value: "",
+      frequency: "mensal" as const,
     }
-    updateInputs({ benefits: [...inputs.benefits, newBenefit] })
+    setBenefits([...benefits, newBenefit])
   }
 
-  const updateBenefit = (index: number, benefit: Benefit) => {
-    const newBenefits = [...inputs.benefits]
-    newBenefits[index] = benefit
-    updateInputs({ benefits: newBenefits })
+  const removeBenefit = (id: number) => {
+    setBenefits(benefits.filter((benefit) => benefit.id !== id))
   }
 
-  const removeBenefit = (index: number) => {
-    const newBenefits = inputs.benefits.filter((_, i) => i !== index)
-    updateInputs({ benefits: newBenefits })
+  const updateBenefit = (id: number, field: string, value: string) => {
+    setBenefits(benefits.map((benefit) => (benefit.id === id ? { ...benefit, [field]: value } : benefit)))
   }
+
+  const titleColor = scenario === 2 ? "text-teal-700" : scenario === 1 ? "text-indigo-700" : "text-blue-700"
+  const buttonColor =
+    scenario === 2
+      ? "bg-teal-100 hover:bg-teal-200 text-teal-700"
+      : scenario === 1
+        ? "bg-indigo-100 hover:bg-indigo-200 text-indigo-700"
+        : "bg-blue-100 hover:bg-blue-200 text-blue-700"
 
   return (
-    <div className={`border-2 rounded-xl p-6 space-y-6 ${colorClasses}`}>
-      <div className="text-center">
-        <h3 className={`text-xl font-bold text-${accentColor}-800 mb-2`}>{title}</h3>
-        <div className={`w-16 h-1 bg-${accentColor}-400 mx-auto rounded-full`}></div>
-      </div>
-
-      {/* Annual Adjustment Rate */}
-      <div className="space-y-2">
-        <label className={`flex items-center gap-2 text-sm font-semibold text-${accentColor}-900`}>
-          <DollarSign className="w-4 h-4" />
-          Reajuste anual (%)
-        </label>
-        <input
-          type="number"
-          value={inputs.annualAdjustmentRate}
-          onChange={(e) => updateInputs({ annualAdjustmentRate: Number.parseFloat(e.target.value) || 0 })}
-          className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          step="0.01"
-          min="0"
-          max="20"
-        />
-      </div>
-
-      {/* Salary Type */}
-      <div className="space-y-2">
-        <label className={`flex items-center gap-2 text-sm font-semibold text-${accentColor}-900`}>
-          <Clock className="w-4 h-4" />
-          Tipo de Salário
-        </label>
-        <select
-          value={inputs.salaryType}
-          onChange={(e) => updateInputs({ salaryType: e.target.value as "mensal" | "horista" })}
-          className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="mensal">Mensal</option>
-          <option value="horista">Horista</option>
-        </select>
-      </div>
-
-      {/* Salary Inputs */}
-      {inputs.salaryType === "mensal" ? (
-        <div className="space-y-2">
-          <label className={`text-sm font-semibold text-${accentColor}-900`}>Salário mensal (R$)</label>
+    <Card>
+      <CardHeader>
+        <CardTitle className={`text-center ${titleColor}`}>
+          <DollarSign className="w-5 h-5 inline mr-2" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Reajuste Anual */}
+        <div>
+          <label htmlFor={`annualAdjustmentRate${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+            Reajuste anual (%)
+          </label>
           <input
             type="number"
-            value={inputs.initialMonthlySalary || ""}
-            onChange={(e) => updateInputs({ initialMonthlySalary: Number.parseFloat(e.target.value) || 0 })}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ex: 5000,50"
+            id={`annualAdjustmentRate${scenario}`}
+            step="0.1"
             min="0"
-            step="0.01"
+            max="50"
+            defaultValue="3.5"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Ex: 3.5"
           />
         </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className={`text-sm font-semibold text-${accentColor}-900`}>Valor por hora (R$)</label>
-            <input
-              type="number"
-              value={inputs.hourlyRate || ""}
-              onChange={(e) => updateInputs({ hourlyRate: Number.parseFloat(e.target.value) || 0 })}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Ex: 25,75"
-              min="0"
-              step="0.01"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className={`text-sm font-semibold text-${accentColor}-900`}>Horas no mês</label>
-            <input
-              type="number"
-              value={inputs.hoursPerMonth || ""}
-              onChange={(e) => updateInputs({ hoursPerMonth: Number(e.target.value) })}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Ex: 200"
-              min="0"
-            />
-          </div>
-        </div>
-      )}
 
-      {/* Benefits */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className={`flex items-center gap-2 text-sm font-semibold text-${accentColor}-900`}>
-            <Gift className="w-4 h-4" />
-            Benefícios
+        {/* Tipo de Salário */}
+        <div>
+          <label htmlFor={`salaryType${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+            Tipo de Salário
           </label>
-          <button
-            type="button"
-            onClick={addBenefit}
-            className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-${accentColor}-700 bg-${accentColor}-100 hover:bg-${accentColor}-200 rounded-md transition-colors`}
+          <select
+            id={`salaryType${scenario}`}
+            value={salaryType}
+            onChange={(e) => setSalaryType(e.target.value as "mensal" | "horista")}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <Plus className="w-3 h-3" />
-            Adicionar
-          </button>
+            <option value="mensal">Mensal</option>
+            <option value="horista">Horista</option>
+          </select>
         </div>
 
-        <div className="space-y-3">
-          {inputs.benefits.map((benefit, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-gray-200"
-            >
-              <input
-                type="text"
-                value={benefit.name}
-                onChange={(e) => updateBenefit(index, { ...benefit, name: e.target.value })}
-                className="col-span-4 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Nome do benefício"
-              />
+        {/* Inputs de Salário */}
+        {salaryType === "mensal" ? (
+          <div>
+            <label htmlFor={`salary${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+              Salário mensal (R$)
+            </label>
+            <input
+              type="number"
+              id={`salary${scenario}`}
+              step="0.01"
+              min="0"
+              max="1000000"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Ex: 5000,00"
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor={`hourlyRate${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+                Valor por hora (R$)
+              </label>
               <input
                 type="number"
-                value={benefit.value || ""}
-                onChange={(e) => updateBenefit(index, { ...benefit, value: Number.parseFloat(e.target.value) || 0 })}
-                className="col-span-3 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Valor"
-                min="0"
+                id={`hourlyRate${scenario}`}
                 step="0.01"
+                min="0"
+                max="10000"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ex: 25,00"
               />
-              <select
-                value={benefit.frequency}
-                onChange={(e) => updateBenefit(index, { ...benefit, frequency: e.target.value as "mensal" | "anual" })}
-                className="col-span-4 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="mensal">Mensal</option>
-                <option value="anual">Anual</option>
-              </select>
-              <button
-                type="button"
-                onClick={() => removeBenefit(index)}
-                className="col-span-1 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Discounts Toggle */}
-      <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <label className={`flex items-center gap-2 text-sm font-semibold text-${accentColor}-900`}>
-            <Users className="w-4 h-4" />
-            Calcular descontos (INSS/IRRF)?
-          </label>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={inputs.calculateDiscounts}
-              onChange={(e) => updateInputs({ calculateDiscounts: e.target.checked })}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
-
-        {inputs.calculateDiscounts && (
-          <div className="space-y-2">
-            <label className={`text-sm font-semibold text-${accentColor}-900`}>Número de dependentes</label>
-            <input
-              type="number"
-              value={inputs.dependents}
-              onChange={(e) => updateInputs({ dependents: Number(e.target.value) })}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              min="0"
-              max="10"
-            />
+            <div>
+              <label htmlFor={`hoursPerMonth${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+                Horas por mês
+              </label>
+              <input
+                type="number"
+                id={`hoursPerMonth${scenario}`}
+                min="1"
+                max="300"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ex: 200"
+              />
+            </div>
           </div>
         )}
-      </div>
-    </div>
+
+        {/* Indenização */}
+        <div>
+          <label htmlFor={`indenizationPercentage${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+            Indenização (% do salário anual)
+          </label>
+          <input
+            type="number"
+            id={`indenizationPercentage${scenario}`}
+            step="0.1"
+            min="0"
+            max="100"
+            defaultValue="0"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Ex: 10.0"
+          />
+          <p className="text-xs text-gray-500 mt-1">Porcentagem sobre salário anual + 13º (não inclui férias)</p>
+        </div>
+
+        {/* Benefícios */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-md font-semibold text-gray-700">Benefícios</h4>
+            <Button type="button" variant="outline" size="sm" onClick={addBenefit} className={buttonColor}>
+              <Plus className="w-4 h-4 mr-1" />
+              Adicionar
+            </Button>
+          </div>
+
+          <div className={`benefits-container space-y-3`} data-scenario={scenario}>
+            {benefits.map((benefit) => (
+              <div
+                key={benefit.id}
+                className="benefit-row grid grid-cols-12 gap-2 items-center p-3 bg-gray-50 rounded-lg"
+              >
+                <input
+                  type="text"
+                  value={benefit.name}
+                  onChange={(e) => updateBenefit(benefit.id, "name", e.target.value)}
+                  className="col-span-4 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="Nome do benefício"
+                />
+                <input
+                  type="number"
+                  value={benefit.value}
+                  onChange={(e) => updateBenefit(benefit.id, "value", e.target.value)}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="Valor"
+                  step="0.01"
+                  min="0"
+                />
+                <select
+                  value={benefit.frequency}
+                  onChange={(e) => updateBenefit(benefit.id, "frequency", e.target.value)}
+                  className="col-span-4 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="mensal">Mensal</option>
+                  <option value="anual">Anual</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => removeBenefit(benefit.id)}
+                  className="col-span-1 text-red-500 hover:text-red-700 font-bold text-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Calcular Descontos */}
+        <div className="border-t pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Calcular descontos (INSS e IRRF)</label>
+              <p className="text-xs text-gray-500">Ativar para calcular descontos obrigatórios</p>
+            </div>
+            <Switch
+              checked={calculateDiscounts}
+              onCheckedChange={setCalculateDiscounts}
+              className="calculate-discounts-toggle"
+              data-scenario={scenario}
+            />
+          </div>
+
+          {calculateDiscounts && (
+            <div className="mt-4 discounts-options" data-scenario={scenario}>
+              <label htmlFor={`dependents${scenario}`} className="block text-sm font-medium text-gray-700 mb-2">
+                Número de dependentes
+              </label>
+              <input
+                type="number"
+                id={`dependents${scenario}`}
+                min="0"
+                max="20"
+                defaultValue="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ex: 2"
+              />
+              <p className="text-xs text-gray-500 mt-1">Para cálculo do IRRF (R$ 189,59 por dependente)</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

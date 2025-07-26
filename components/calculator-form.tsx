@@ -1,114 +1,246 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import { Calculator, Loader2 } from "lucide-react"
+import { Calculator, AlertTriangle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import ScenarioInput from "./scenario-input"
-import type { CalculationMode, CalculationInputs } from "@/types/calculator"
+import ResultsDisplay from "./results-display"
+import type { CalculationMode, CalculationInputs, CalculationResults } from "@/types/calculator"
 import { validateInputs } from "@/lib/validation"
+import { performCalculation } from "@/lib/calculations"
 
-interface CalculatorFormProps {
-  mode: CalculationMode
-  onCalculate: (period: number, inputs: CalculationInputs[]) => void
-  isLoading: boolean
-  error: string | null
-}
+export default function CalculatorForm() {
+  const [mode, setMode] = useState<CalculationMode>("single")
+  const [period, setPeriod] = useState("")
+  const [results, setResults] = useState<CalculationResults[] | null>(null)
+  const [error, setError] = useState("")
+  const [isCalculating, setIsCalculating] = useState(false)
 
-export default function CalculatorForm({ mode, onCalculate, isLoading, error }: CalculatorFormProps) {
-  const [period, setPeriod] = useState<number>(10)
-  const [scenario1, setScenario1] = useState<CalculationInputs>({
-    annualAdjustmentRate: 3.5,
-    salaryType: "mensal",
-    initialMonthlySalary: 0,
-    hourlyRate: 0,
-    hoursPerMonth: 0,
-    benefits: [],
-    calculateDiscounts: false,
-    dependents: 0,
-  })
-  const [scenario2, setScenario2] = useState<CalculationInputs>({
-    annualAdjustmentRate: 3.5,
-    salaryType: "mensal",
-    initialMonthlySalary: 0,
-    hourlyRate: 0,
-    hoursPerMonth: 0,
-    benefits: [],
-    calculateDiscounts: false,
-    dependents: 0,
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const inputs = mode === "single" ? [scenario1] : [scenario1, scenario2]
-    const validation = validateInputs(period, inputs)
-
-    if (!validation.isValid) {
+  const handlePeriodChange = (value: string) => {
+    // Permitir campo vazio
+    if (value === "") {
+      setPeriod("")
       return
     }
 
-    onCalculate(period, inputs)
+    // Converter para número e validar
+    const numValue = Number.parseInt(value, 10)
+
+    // Só aceitar números válidos entre 1 e 80
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= 80) {
+      setPeriod(numValue.toString())
+    }
+  }
+
+  const handleCalculate = async () => {
+    setError("")
+    setIsCalculating(true)
+
+    try {
+      // Validar período
+      if (!period || period === "") {
+        setError("Por favor, informe o período de cálculo em anos.")
+        return
+      }
+
+      const periodYears = Number.parseInt(period, 10)
+      if (isNaN(periodYears) || periodYears < 1 || periodYears > 80) {
+        setError("O período deve ser um número inteiro entre 1 e 80 anos.")
+        return
+      }
+
+      if (mode === "single") {
+        const inputs = getScenarioInputs(0)
+        const validation = validateInputs(inputs)
+
+        if (!validation.isValid) {
+          setError(validation.error)
+          return
+        }
+
+        const result = performCalculation(periodYears, inputs)
+        setResults([result])
+      } else {
+        const inputs1 = getScenarioInputs(1)
+        const inputs2 = getScenarioInputs(2)
+
+        const validation1 = validateInputs(inputs1)
+        const validation2 = validateInputs(inputs2)
+
+        if (!validation1.isValid) {
+          setError(`Cenário 1: ${validation1.error}`)
+          return
+        }
+
+        if (!validation2.isValid) {
+          setError(`Cenário 2: ${validation2.error}`)
+          return
+        }
+
+        const result1 = performCalculation(periodYears, inputs1)
+        const result2 = performCalculation(periodYears, inputs2)
+        setResults([result1, result2])
+      }
+    } catch (err) {
+      setError("Erro ao realizar o cálculo. Verifique os dados informados.")
+    } finally {
+      setIsCalculating(false)
+    }
+  }
+
+  const getScenarioInputs = (scenario: number): CalculationInputs => {
+    const salaryType = (document.getElementById(`salaryType${scenario}`) as HTMLSelectElement)?.value as
+      | "mensal"
+      | "horista"
+    const salary = Number.parseFloat((document.getElementById(`salary${scenario}`) as HTMLInputElement)?.value || "0")
+    const hourlyRate = Number.parseFloat(
+      (document.getElementById(`hourlyRate${scenario}`) as HTMLInputElement)?.value || "0",
+    )
+    const hoursPerMonth = Number.parseFloat(
+      (document.getElementById(`hoursPerMonth${scenario}`) as HTMLInputElement)?.value || "0",
+    )
+    const annualAdjustmentRate = Number.parseFloat(
+      (document.getElementById(`annualAdjustmentRate${scenario}`) as HTMLInputElement)?.value || "0",
+    )
+    const indenizationPercentage = Number.parseFloat(
+      (document.getElementById(`indenizationPercentage${scenario}`) as HTMLInputElement)?.value || "0",
+    )
+    const calculateDiscounts =
+      (document.querySelector(`.calculate-discounts-toggle[data-scenario="${scenario}"]`) as HTMLInputElement)
+        ?.checked || false
+    const dependents = Number.parseInt(
+      (document.getElementById(`dependents${scenario}`) as HTMLInputElement)?.value || "0",
+      10,
+    )
+
+    // Coletar benefícios
+    const benefitRows = document.querySelectorAll(`.benefits-container[data-scenario="${scenario}"] .benefit-row`)
+    const benefits = Array.from(benefitRows)
+      .map((row) => {
+        const nameInput = row.querySelector('input[type="text"]') as HTMLInputElement
+        const valueInput = row.querySelector('input[type="number"]') as HTMLInputElement
+        const frequencySelect = row.querySelector("select") as HTMLSelectElement
+
+        return {
+          name: nameInput?.value || "",
+          value: Number.parseFloat(valueInput?.value || "0"),
+          frequency: frequencySelect?.value as "mensal" | "anual",
+        }
+      })
+      .filter((benefit) => benefit.value > 0)
+
+    return {
+      salaryType,
+      initialMonthlySalary: salary,
+      hourlyRate,
+      hoursPerMonth,
+      annualAdjustmentRate,
+      indenizationPercentage,
+      benefits,
+      calculateDiscounts,
+      dependents,
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Period Input */}
-      <div className="bg-blue-50 rounded-lg p-6">
-        <label htmlFor="period" className="block text-sm font-semibold text-blue-900 mb-2">
-          Prazo do cálculo (em anos)
-        </label>
-        <input
-          type="number"
-          id="period"
-          value={period}
-          onChange={(e) => setPeriod(Number.parseFloat(e.target.value) || 0)}
-          className="w-full px-4 py-3 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: 10,5"
-          min="0.1"
-          max="50"
-          step="0.1"
-          required
-        />
-        <p className="text-xs text-blue-700 mt-1">Período para projeção dos ganhos e descontos</p>
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* Header */}
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Calculadora Trabalhista Completa</h1>
+        <p className="text-gray-600">Analise e compare cenários de carreira com todos os detalhes</p>
       </div>
 
-      {/* Scenarios */}
-      <div className={mode === "compare" ? "grid grid-cols-1 lg:grid-cols-2 gap-8" : ""}>
-        <ScenarioInput scenario={1} inputs={scenario1} onChange={setScenario1} isCompareMode={mode === "compare"} />
+      {/* Mode Selector */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex justify-center">
+            <div className="inline-flex rounded-lg border border-gray-200 p-1">
+              <button
+                onClick={() => setMode("single")}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  mode === "single" ? "bg-blue-600 text-white" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Cálculo Único
+              </button>
+              <button
+                onClick={() => setMode("compare")}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  mode === "compare" ? "bg-blue-600 text-white" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Comparar Cenários
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {mode === "compare" && (
-          <ScenarioInput scenario={2} inputs={scenario2} onChange={setScenario2} isCompareMode={true} />
+      {/* Period Input */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="max-w-md mx-auto">
+            <label htmlFor="period" className="block text-sm font-medium text-gray-700 mb-2">
+              Período de cálculo (anos)
+            </label>
+            <input
+              type="number"
+              id="period"
+              min="1"
+              max="80"
+              step="1"
+              value={period}
+              onChange={(e) => handlePeriodChange(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Ex: 10"
+            />
+            <p className="text-xs text-gray-500 mt-1">Entre 1 e 80 anos</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Scenario Inputs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {mode === "single" ? (
+          <div className="lg:col-span-2">
+            <ScenarioInput scenario={0} title="Dados do Cenário" />
+          </div>
+        ) : (
+          <>
+            <ScenarioInput scenario={1} title="Cenário 1" />
+            <ScenarioInput scenario={2} title="Cenário 2" />
+          </>
         )}
+      </div>
+
+      {/* Calculate Button */}
+      <div className="text-center">
+        <Button onClick={handleCalculate} disabled={isCalculating} size="lg" className="px-8 py-3 text-lg">
+          <Calculator className="w-5 h-5 mr-2" />
+          {isCalculating ? "Calculando..." : "Calcular Projeção"}
+        </Button>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800 font-medium">{error}</p>
-        </div>
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-red-800">
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-medium">{error}</span>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Submit Button */}
-      <div className="pt-4">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Calculando...</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-2">
-              <Calculator className="w-5 h-5" />
-              <span>Calcular Projeção</span>
-            </div>
-          )}
-        </button>
+      {/* Results */}
+      {results && <ResultsDisplay mode={mode} results={results} />}
+
+      {/* Footer */}
+      <div className="text-center text-sm text-gray-500 border-t pt-6">
+        <p>Valores de INSS e IRRF baseados nas tabelas de 2025. Esta é uma ferramenta de simulação.</p>
       </div>
-    </form>
+    </div>
   )
 }

@@ -1,78 +1,53 @@
-import type { CalculationInputs } from "@/types/calculator"
+import type { CalculationInputs, ValidationResult } from "@/types/calculator"
 
-export interface ValidationResult {
-  isValid: boolean
-  error?: string
-}
-
-export const validateInputs = (period: number, inputs: CalculationInputs[]): ValidationResult => {
-  // Validate period
-  if (isNaN(period) || period <= 0 || period > 50) {
-    return {
-      isValid: false,
-      error: "Por favor, insira um prazo de cálculo válido entre 1 e 50 anos.",
+export const validateInputs = (inputs: CalculationInputs): ValidationResult => {
+  // Validar tipo de salário e valores
+  if (inputs.salaryType === "mensal") {
+    if (!inputs.initialMonthlySalary || inputs.initialMonthlySalary <= 0) {
+      return { isValid: false, error: "Informe um salário mensal válido." }
+    }
+    if (inputs.initialMonthlySalary > 1000000) {
+      return { isValid: false, error: "Salário mensal não pode ser superior a R$ 1.000.000,00." }
+    }
+  } else {
+    if (!inputs.hourlyRate || inputs.hourlyRate <= 0) {
+      return { isValid: false, error: "Informe um valor por hora válido." }
+    }
+    if (!inputs.hoursPerMonth || inputs.hoursPerMonth <= 0) {
+      return { isValid: false, error: "Informe a quantidade de horas por mês." }
+    }
+    if (inputs.hourlyRate > 10000) {
+      return { isValid: false, error: "Valor por hora não pode ser superior a R$ 10.000,00." }
+    }
+    if (inputs.hoursPerMonth > 300) {
+      return { isValid: false, error: "Horas por mês não pode ser superior a 300." }
     }
   }
 
-  // Validate each scenario
-  for (let i = 0; i < inputs.length; i++) {
-    const input = inputs[i]
-    const scenarioNumber = inputs.length > 1 ? i + 1 : ""
+  // Validar reajuste anual
+  if (inputs.annualAdjustmentRate < 0 || inputs.annualAdjustmentRate > 50) {
+    return { isValid: false, error: "Reajuste anual deve estar entre 0% e 50%." }
+  }
 
-    let monthlySalary = 0
+  // Validar indenização
+  if (inputs.indenizationPercentage < 0 || inputs.indenizationPercentage > 100) {
+    return { isValid: false, error: "Indenização deve estar entre 0% e 100%." }
+  }
 
-    if (input.salaryType === "mensal") {
-      monthlySalary = input.initialMonthlySalary
-      if (isNaN(monthlySalary) || monthlySalary <= 0 || monthlySalary > 1000000) {
-        return {
-          isValid: false,
-          error: `Salário mensal deve estar entre R$ 0,01 e R$ 1.000.000,00${scenarioNumber ? ` no Cenário ${scenarioNumber}` : ""}.`,
-        }
-      }
-    } else {
-      if (
-        isNaN(input.hourlyRate) ||
-        input.hourlyRate <= 0 ||
-        input.hourlyRate > 10000 ||
-        isNaN(input.hoursPerMonth) ||
-        input.hoursPerMonth <= 0 ||
-        input.hoursPerMonth > 744
-      ) {
-        return {
-          isValid: false,
-          error: `Valores de horista inválidos${scenarioNumber ? ` no Cenário ${scenarioNumber}` : ""}. Valor por hora deve estar entre R$ 0,01 e R$ 10.000,00 e horas entre 1 e 744.`,
-        }
-      }
-      monthlySalary = input.hourlyRate * input.hoursPerMonth
+  // Validar dependentes
+  if (inputs.dependents < 0 || inputs.dependents > 20) {
+    return { isValid: false, error: "Número de dependentes deve estar entre 0 e 20." }
+  }
+
+  // Validar benefícios
+  for (const benefit of inputs.benefits) {
+    if (benefit.value < 0) {
+      return { isValid: false, error: "Valores de benefícios não podem ser negativos." }
     }
-
-    // Validate adjustment rate
-    if (isNaN(input.annualAdjustmentRate) || input.annualAdjustmentRate < 0 || input.annualAdjustmentRate > 100) {
-      return {
-        isValid: false,
-        error: `Taxa de reajuste anual deve estar entre 0% e 100%${scenarioNumber ? ` no Cenário ${scenarioNumber}` : ""}.`,
-      }
-    }
-
-    // Validate dependents
-    if (input.calculateDiscounts && (isNaN(input.dependents) || input.dependents < 0 || input.dependents > 20)) {
-      return {
-        isValid: false,
-        error: `Número de dependentes deve estar entre 0 e 20${scenarioNumber ? ` no Cenário ${scenarioNumber}` : ""}.`,
-      }
-    }
-
-    // Validate benefits
-    for (let j = 0; j < input.benefits.length; j++) {
-      const benefit = input.benefits[j]
-      if (benefit.value > 0 && (isNaN(benefit.value) || benefit.value > 1000000)) {
-        return {
-          isValid: false,
-          error: `Valor do benefício "${benefit.name || `#${j + 1}`}" deve estar entre R$ 0,01 e R$ 1.000.000,00${scenarioNumber ? ` no Cenário ${scenarioNumber}` : ""}.`,
-        }
-      }
+    if (benefit.value > 1000000) {
+      return { isValid: false, error: "Valor de benefício não pode ser superior a R$ 1.000.000,00." }
     }
   }
 
-  return { isValid: true }
+  return { isValid: true, error: "" }
 }
