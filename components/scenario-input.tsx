@@ -231,7 +231,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
 
         {/* Calcular Descontos */}
         <div className="border-t dark:border-gray-600 pt-4 md:pt-6">
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center my-1">
             <div className="flex-1 mr-4">
               <label className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 block">
                 Calcular descontos (INSS e IRRF)
