@@ -51,18 +51,18 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
 
   return (
     <Card className="dark:bg-gray-800 dark:border-gray-700">
-      <CardHeader>
-        <CardTitle className={`text-center ${titleColor}`}>
+      <CardHeader className="pb-4">
+        <CardTitle className={`text-center text-lg md:text-xl ${titleColor}`}>
           <DollarSign className="w-5 h-5 inline mr-2" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 md:space-y-6 p-3 md:p-6">
         {/* Reajuste Anual */}
         <div>
           <label
             htmlFor={`annualAdjustmentRate${scenario}`}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Reajuste anual (%)
           </label>
@@ -73,7 +73,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
             min="0"
             max="50"
             defaultValue="3.5"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+            className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
             placeholder="Ex: 3.5"
           />
         </div>
@@ -82,7 +82,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
         <div>
           <label
             htmlFor={`salaryType${scenario}`}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Tipo de Salário
           </label>
@@ -90,7 +90,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
             id={`salaryType${scenario}`}
             value={salaryType}
             onChange={(e) => setSalaryType(e.target.value as "mensal" | "horista")}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100"
+            className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 text-base md:text-lg"
           >
             <option value="mensal">Mensal</option>
             <option value="horista">Horista</option>
@@ -102,7 +102,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
           <div>
             <label
               htmlFor={`salary${scenario}`}
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Salário mensal (R$)
             </label>
@@ -112,16 +112,16 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
               step="0.01"
               min="0"
               max="1000000"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+              className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
               placeholder="Ex: 5000,00"
             />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor={`hourlyRate${scenario}`}
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Valor por hora (R$)
               </label>
@@ -131,14 +131,14 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
                 step="0.01"
                 min="0"
                 max="10000"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+                className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
                 placeholder="Ex: 25,00"
               />
             </div>
             <div>
               <label
                 htmlFor={`hoursPerMonth${scenario}`}
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Horas por mês
               </label>
@@ -147,7 +147,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
                 id={`hoursPerMonth${scenario}`}
                 min="1"
                 max="300"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+                className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
                 placeholder="Ex: 200"
               />
             </div>
@@ -158,7 +158,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
         <div>
           <label
             htmlFor={`indenizationPercentage${scenario}`}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Indenização (% do salário anual)
           </label>
@@ -169,10 +169,10 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
             min="0"
             max="100"
             defaultValue="0"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+            className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
             placeholder="Ex: 10.0"
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
             Porcentagem sobre salário anual + 13º (não inclui férias)
           </p>
         </div>
@@ -180,8 +180,8 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
         {/* Benefícios */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300">Benefícios</h4>
-            <Button type="button" variant="outline" size="sm" onClick={addBenefit} className={buttonColor}>
+            <h4 className="text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300">Benefícios</h4>
+            <Button type="button" variant="outline" size="sm" onClick={addBenefit} className={`${buttonColor} text-sm`}>
               <Plus className="w-4 h-4 mr-1" />
               Adicionar
             </Button>
@@ -191,20 +191,20 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
             {benefits.map((benefit) => (
               <div
                 key={benefit.id}
-                className="benefit-row grid grid-cols-12 gap-2 items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                className="benefit-row flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center p-2 md:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
               >
                 <input
                   type="text"
                   value={benefit.name}
                   onChange={(e) => updateBenefit(benefit.id, "name", e.target.value)}
-                  className="col-span-4 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+                  className="flex-1 px-3 py-2 md:py-3 border border-gray-300 dark:border-gray-600 rounded-md text-sm md:text-base dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
                   placeholder="Nome do benefício"
                 />
                 <input
                   type="number"
                   value={benefit.value}
                   onChange={(e) => updateBenefit(benefit.id, "value", e.target.value)}
-                  className="col-span-3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+                  className="w-full sm:w-32 px-3 py-2 md:py-3 border border-gray-300 dark:border-gray-600 rounded-md text-sm md:text-base dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
                   placeholder="Valor"
                   step="0.01"
                   min="0"
@@ -212,7 +212,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
                 <select
                   value={benefit.frequency}
                   onChange={(e) => updateBenefit(benefit.id, "frequency", e.target.value)}
-                  className="col-span-4 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-800 dark:text-gray-100"
+                  className="w-full sm:w-28 px-3 py-2 md:py-3 border border-gray-300 dark:border-gray-600 rounded-md text-sm md:text-base dark:bg-gray-800 dark:text-gray-100"
                 >
                   <option value="mensal">Mensal</option>
                   <option value="anual">Anual</option>
@@ -220,7 +220,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
                 <button
                   type="button"
                   onClick={() => removeBenefit(benefit.id)}
-                  className="col-span-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold text-lg"
+                  className="self-center sm:self-auto text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold text-lg p-2"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -230,13 +230,15 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
         </div>
 
         {/* Calcular Descontos */}
-        <div className="border-t dark:border-gray-600 pt-6">
+        <div className="border-t dark:border-gray-600 pt-4 md:pt-6">
           <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="flex-1 mr-4">
+              <label className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 block">
                 Calcular descontos (INSS e IRRF)
               </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Ativar para calcular descontos obrigatórios</p>
+              <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                Ativar para calcular descontos obrigatórios
+              </p>
             </div>
             <Switch
               checked={calculateDiscounts}
@@ -250,7 +252,7 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
             <div className="mt-4 discounts-options" data-scenario={scenario}>
               <label
                 htmlFor={`dependents${scenario}`}
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Número de dependentes
               </label>
@@ -260,10 +262,10 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
                 min="0"
                 max="20"
                 defaultValue="0"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+                className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
                 placeholder="Ex: 2"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Para cálculo do IRRF (R$ 189,59 por dependente)
               </p>
             </div>

@@ -1,100 +1,63 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { Chart, type ChartConfiguration, registerables } from "chart.js"
 import { formatCurrency } from "@/lib/utils"
-
-Chart.register(...registerables)
 
 interface ComparisonChartProps {
   data: number[]
 }
 
 export default function ComparisonChart({ data }: ComparisonChartProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const chartRef = useRef<Chart | null>(null)
-
-  useEffect(() => {
-    if (!canvasRef.current) return
-
-    // Destroy existing chart
-    if (chartRef.current) {
-      chartRef.current.destroy()
-    }
-
-    const ctx = canvasRef.current.getContext("2d")
-    if (!ctx) return
-
-    const config: ChartConfiguration = {
-      type: "bar",
-      data: {
-        labels: ["Cenário 1", "Cenário 2"],
-        datasets: [
-          {
-            label: "Ganho Total no Período",
-            data: data,
-            backgroundColor: ["rgba(99, 102, 241, 0.8)", "rgba(15, 118, 110, 0.8)"],
-            borderColor: ["rgb(99, 102, 241)", "rgb(15, 118, 110)"],
-            borderWidth: 2,
-            borderRadius: 8,
-            borderSkipped: false,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            titleColor: "white",
-            bodyColor: "white",
-            borderColor: "rgba(255, 255, 255, 0.1)",
-            borderWidth: 1,
-            cornerRadius: 8,
-            callbacks: {
-              label: (context) => `Ganho Total: ${formatCurrency(context.parsed.y)}`,
-            },
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: "rgba(0, 0, 0, 0.1)",
-            },
-            ticks: {
-              callback: (value) => formatCurrency(Number(value)),
-            },
-          },
-          x: {
-            grid: {
-              display: false,
-            },
-          },
-        },
-        animation: {
-          duration: 1000,
-          easing: "easeOutQuart",
-        },
-      },
-    }
-
-    chartRef.current = new Chart(ctx, config)
-
-    return () => {
-      if (chartRef.current) {
-        chartRef.current.destroy()
-      }
-    }
-  }, [data])
+  const [value1, value2] = data
+  const maxValue = Math.max(value1, value2)
+  const percentage1 = (value1 / maxValue) * 100
+  const percentage2 = (value2 / maxValue) * 100
 
   return (
-    <div className="relative h-80">
-      <canvas ref={canvasRef} />
+    <div className="space-y-6">
+      <div className="space-y-4">
+        {/* Cenário 1 */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm md:text-base font-medium text-indigo-700 dark:text-indigo-400">Cenário 1</span>
+            <span className="text-sm md:text-base font-bold text-indigo-800 dark:text-indigo-300 break-words">
+              {formatCurrency(value1)}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 md:h-6">
+            <div
+              className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-4 md:h-6 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${percentage1}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Cenário 2 */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm md:text-base font-medium text-teal-700 dark:text-teal-400">Cenário 2</span>
+            <span className="text-sm md:text-base font-bold text-teal-800 dark:text-teal-300 break-words">
+              {formatCurrency(value2)}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 md:h-6">
+            <div
+              className="bg-gradient-to-r from-teal-500 to-teal-600 h-4 md:h-6 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${percentage2}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Diferença */}
+      <div className="text-center p-3 md:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="text-sm md:text-base text-gray-600 dark:text-gray-400">Diferença</div>
+        <div className="text-lg md:text-xl font-bold text-gray-800 dark:text-gray-200 break-words">
+          {formatCurrency(Math.abs(value2 - value1))}
+        </div>
+        <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+          {value2 > value1 ? "Cenário 2 é melhor" : value1 > value2 ? "Cenário 1 é melhor" : "Empate"}
+        </div>
+      </div>
     </div>
   )
 }

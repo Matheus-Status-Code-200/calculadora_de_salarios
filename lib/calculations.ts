@@ -1,159 +1,162 @@
 import type { CalculationInputs, CalculationResults, YearlyData } from "@/types/calculator"
 
-// Tabelas de INSS 2025
-const inssTable = [
-  { limit: 1518.0, rate: 0.075 },
-  { limit: 2793.88, rate: 0.09 },
-  { limit: 4190.83, rate: 0.12 },
-  { limit: 8157.41, rate: 0.14 },
+// Tabelas INSS 2025
+const INSS_TABLE_2025 = [
+  { min: 0, max: 1412, rate: 0.075 },
+  { min: 1412.01, max: 2666.68, rate: 0.09 },
+  { min: 2666.69, max: 4000.03, rate: 0.12 },
+  { min: 4000.04, max: 7786.02, rate: 0.14 },
 ]
 
-const inssTeto = 951.62
+const INSS_MAX_2025 = 7786.02
+const INSS_MAX_CONTRIBUTION_2025 = 908.85
 
-// Tabela de IRRF 2025
-const irrfTable = [
-  { limit: 2428.8, rate: 0, deduction: 0 },
-  { limit: 2826.65, rate: 0.075, deduction: 182.16 },
-  { limit: 3751.05, rate: 0.15, deduction: 394.16 },
-  { limit: 4664.68, rate: 0.225, deduction: 675.49 },
-  { limit: Number.POSITIVE_INFINITY, rate: 0.275, deduction: 896.0 },
+// Tabela IRRF 2025
+const IRRF_TABLE_2025 = [
+  { min: 0, max: 2259.2, rate: 0, deduction: 0 },
+  { min: 2259.21, max: 2826.65, rate: 0.075, deduction: 169.44 },
+  { min: 2826.66, max: 3751.05, rate: 0.15, deduction: 381.44 },
+  { min: 3751.06, max: 4664.68, rate: 0.225, deduction: 662.77 },
+  { min: 4664.69, max: Number.POSITIVE_INFINITY, rate: 0.275, deduction: 896.0 },
 ]
 
-const dependentDeduction = 189.59
+const DEPENDENT_DEDUCTION_2025 = 189.59
 
-export const calculateINSS = (salary: number): number => {
-  if (salary > inssTable[3].limit) return inssTeto
+function calculateINSS(salary: number): number {
+  if (salary <= 0) return 0
+  if (salary > INSS_MAX_2025) return INSS_MAX_CONTRIBUTION_2025
 
   let inss = 0
-  let lastLimit = 0
+  let remainingSalary = salary
 
-  for (const range of inssTable) {
-    if (salary > range.limit) {
-      inss += (range.limit - lastLimit) * range.rate
-      lastLimit = range.limit
-    } else {
-      inss += (salary - lastLimit) * range.rate
-      return Math.round(inss * 100) / 100
+  for (const bracket of INSS_TABLE_2025) {
+    if (remainingSalary <= 0) break
+
+    const bracketMin = bracket.min
+    const bracketMax = bracket.max === Number.POSITIVE_INFINITY ? salary : Math.min(bracket.max, salary)
+    const bracketAmount = Math.max(0, bracketMax - Math.max(bracketMin, 0))
+
+    if (bracketAmount > 0) {
+      inss += bracketAmount * bracket.rate
+      remainingSalary -= bracketAmount
     }
   }
 
-  return Math.round(inss * 100) / 100
+  return Math.min(inss, INSS_MAX_CONTRIBUTION_2025)
 }
 
-export const calculateIRRF = (salary: number, inssDiscount: number, dependents: number): number => {
-  const base = salary - inssDiscount - dependents * dependentDeduction
+function calculateIRRF(salary: number, inss: number, dependents: number): number {
+  const taxableIncome = salary - inss - dependents * DEPENDENT_DEDUCTION_2025
 
-  if (base <= irrfTable[0].limit) return 0
+  if (taxableIncome <= 0) return 0
 
-  for (const range of irrfTable) {
-    if (base <= range.limit) {
-      const irrf = base * range.rate - range.deduction
-      return Math.max(0, Math.round(irrf * 100) / 100)
+  for (const bracket of IRRF_TABLE_2025) {
+    if (taxableIncome >= bracket.min && taxableIncome <= bracket.max) {
+      const irrf = taxableIncome * bracket.rate - bracket.deduction
+      return Math.max(0, irrf)
     }
   }
 
   return 0
 }
 
-export const performCalculation = (period: number, inputs: CalculationInputs): CalculationResults => {
+export function performCalculation(years: number, inputs: CalculationInputs): CalculationResults {
+  const yearlyData: YearlyData[] = []
   let totalGrossGains = 0
   let totalNetGains = 0
+  let totalVacations = 0
+  let totalThirteenthSalary = 0
   let totalInss = 0
   let totalIrrf = 0
   let totalFgts = 0
   let totalBenefits = 0
-  let totalVacations = 0
   let totalIndenization = 0
 
-  const yearlyData: YearlyData[] = []
-
   // Calcular salário mensal inicial
-  let currentMonthlySalary =
+  let monthlySalary =
     inputs.salaryType === "mensal" ? inputs.initialMonthlySalary : inputs.hourlyRate * inputs.hoursPerMonth
 
-  const adjustmentMultiplier = 1 + inputs.annualAdjustmentRate / 100
-
-  // Calcular benefícios anuais
-  const annualBenefitValue = inputs.benefits.reduce((acc, benefit) => {
-    return acc + (benefit.frequency === "mensal" ? benefit.value * 12 : benefit.value)
-  }, 0)
-
-  for (let year = 1; year <= period; year++) {
-    // Salários do ano
-    const grossSalary12 = currentMonthlySalary * 12
-    const thirteenthSalary = currentMonthlySalary
-
-    // Calcular férias (salário + 1/3 constitucional)
-    const vacationBase = currentMonthlySalary
-    const vacationBonus = currentMonthlySalary / 3
-    const annualVacations = vacationBase + vacationBonus
-
-    // Indenização (% sobre salário anual + 13º)
-    const indenizationBase = grossSalary12 + thirteenthSalary
-    const annualIndenization = (indenizationBase * inputs.indenizationPercentage) / 100
-
-    const annualGross = grossSalary12 + thirteenthSalary + annualVacations
-
-    let annualInss = 0
-    let annualIrrf = 0
-
-    if (inputs.calculateDiscounts) {
-      // Calculate INSS for 12 months + 13th salary + vacation
-      const inss12 = calculateINSS(currentMonthlySalary) * 12
-      const inss13 = calculateINSS(thirteenthSalary)
-      const inssVacation = calculateINSS(annualVacations)
-      annualInss = inss12 + inss13 + inssVacation
-
-      // Calculate IRRF for 12 months + 13th salary + vacation
-      const irrf12 = calculateIRRF(currentMonthlySalary, inss12 / 12, inputs.dependents) * 12
-      const irrf13 = calculateIRRF(thirteenthSalary, inss13, inputs.dependents)
-      const irrfVacation = calculateIRRF(annualVacations, inssVacation, inputs.dependents)
-      annualIrrf = irrf12 + irrf13 + irrfVacation
+  for (let year = 1; year <= years; year++) {
+    // Aplicar reajuste anual (exceto no primeiro ano)
+    if (year > 1) {
+      monthlySalary *= 1 + inputs.annualAdjustmentRate / 100
     }
 
-    const annualFgts = annualGross * 0.08
-    const annualNetGains = annualGross - annualInss - annualIrrf
+    // Cálculos anuais
+    const annualSalary = monthlySalary * 12
+    const thirteenthSalary = monthlySalary
+    const vacationSalary = monthlySalary + monthlySalary / 3 // Férias + 1/3
 
-    // Adicionar dados do ano ao array
+    const grossGains = annualSalary + thirteenthSalary + vacationSalary
+
+    // Benefícios anuais
+    const yearlyBenefits = inputs.benefits.reduce((sum, benefit) => {
+      return sum + (benefit.frequency === "mensal" ? benefit.value * 12 : benefit.value)
+    }, 0)
+
+    // Cálculo de descontos se habilitado
+    let yearlyInss = 0
+    let yearlyIrrf = 0
+    let netGains = grossGains
+
+    if (inputs.calculateDiscounts) {
+      // INSS sobre salário mensal (12x) + 13º
+      const monthlyInss = calculateINSS(monthlySalary)
+      const thirteenthInss = calculateINSS(thirteenthSalary)
+      yearlyInss = monthlyInss * 12 + thirteenthInss
+
+      // IRRF sobre salário mensal (12x) + 13º
+      const monthlyIrrf = calculateIRRF(monthlySalary, monthlyInss, inputs.dependents)
+      const thirteenthIrrf = calculateIRRF(thirteenthSalary, thirteenthInss, inputs.dependents)
+      yearlyIrrf = monthlyIrrf * 12 + thirteenthIrrf
+
+      netGains = grossGains - yearlyInss - yearlyIrrf
+    }
+
+    // FGTS (8% sobre salário + 13º, não sobre férias)
+    const fgts = (annualSalary + thirteenthSalary) * 0.08
+
+    // Indenização (aplicada sobre salário anual + 13º)
+    const indenization = (annualSalary + thirteenthSalary) * (inputs.indenizationPercentage / 100)
+
+    // Armazenar dados do ano
     yearlyData.push({
       year,
-      monthlySalary: Math.round(currentMonthlySalary * 100) / 100,
-      grossSalary12: Math.round(grossSalary12 * 100) / 100,
-      thirteenthSalary: Math.round(thirteenthSalary * 100) / 100,
-      vacations: Math.round(annualVacations * 100) / 100,
-      totalGross: Math.round(annualGross * 100) / 100,
-      inss: Math.round(annualInss * 100) / 100,
-      irrf: Math.round(annualIrrf * 100) / 100,
-      fgts: Math.round(annualFgts * 100) / 100,
-      benefits: Math.round(annualBenefitValue * 100) / 100,
-      indenization: Math.round(annualIndenization * 100) / 100,
-      netGains: Math.round(annualNetGains * 100) / 100,
+      monthlySalary,
+      grossGains,
+      netGains,
+      vacations: vacationSalary,
+      thirteenthSalary,
+      inss: yearlyInss,
+      irrf: yearlyIrrf,
+      fgts,
+      benefits: yearlyBenefits,
+      indenization,
     })
 
-    // Accumulate totals with precision
-    totalGrossGains = Math.round((totalGrossGains + annualGross) * 100) / 100
-    totalNetGains = Math.round((totalNetGains + annualGross - annualInss - annualIrrf) * 100) / 100
-    totalInss = Math.round((totalInss + annualInss) * 100) / 100
-    totalIrrf = Math.round((totalIrrf + annualIrrf) * 100) / 100
-    totalFgts = Math.round((totalFgts + annualFgts) * 100) / 100
-    totalBenefits = Math.round((totalBenefits + annualBenefitValue) * 100) / 100
-    totalVacations = Math.round((totalVacations + annualVacations) * 100) / 100
-    totalIndenization = Math.round((totalIndenization + annualIndenization) * 100) / 100
-
-    // Apply annual adjustment for next year
-    currentMonthlySalary = Math.round(currentMonthlySalary * adjustmentMultiplier * 100) / 100
+    // Acumular totais
+    totalGrossGains += grossGains
+    totalNetGains += netGains
+    totalVacations += vacationSalary
+    totalThirteenthSalary += thirteenthSalary
+    totalInss += yearlyInss
+    totalIrrf += yearlyIrrf
+    totalFgts += fgts
+    totalBenefits += yearlyBenefits
+    totalIndenization += indenization
   }
 
   return {
+    yearlyData,
     totalGrossGains,
     totalNetGains,
+    totalVacations,
+    totalThirteenthSalary,
     totalInss,
     totalIrrf,
     totalFgts,
     totalBenefits,
-    totalVacations,
     totalIndenization,
     hasDiscounts: inputs.calculateDiscounts,
-    yearlyData,
   }
 }

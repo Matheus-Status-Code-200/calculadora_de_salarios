@@ -1,7 +1,3 @@
-export type CalculationMode = "single" | "compare"
-
-export type SalaryType = "mensal" | "horista"
-
 export interface Benefit {
   name: string
   value: number
@@ -9,7 +5,7 @@ export interface Benefit {
 }
 
 export interface CalculationInputs {
-  salaryType: SalaryType
+  salaryType: "mensal" | "horista"
   initialMonthlySalary: number
   hourlyRate: number
   hoursPerMonth: number
@@ -23,32 +19,29 @@ export interface CalculationInputs {
 export interface YearlyData {
   year: number
   monthlySalary: number
-  grossSalary12: number
-  thirteenthSalary: number
+  grossGains: number
+  netGains: number
   vacations: number
-  totalGross: number
+  thirteenthSalary: number
   inss: number
   irrf: number
   fgts: number
   benefits: number
   indenization: number
-  netGains: number
 }
 
 export interface CalculationResults {
+  yearlyData: YearlyData[]
   totalGrossGains: number
   totalNetGains: number
+  totalVacations: number
+  totalThirteenthSalary: number
   totalInss: number
   totalIrrf: number
   totalFgts: number
   totalBenefits: number
-  totalVacations: number
   totalIndenization: number
   hasDiscounts: boolean
-  yearlyData: YearlyData[]
 }
 
-export interface ValidationResult {
-  isValid: boolean
-  error: string
-}
+export type CalculationMode = "single" | "compare"
