@@ -36,7 +36,7 @@ export default function CalculatorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
-      <div className="container mx-auto py-12 my-0 px-3">
+      <div className="container mx-auto py-12 my-0 px-0">
         {/* Header */}
         <div className="text-center mb-12 relative">
           {/* Theme Toggle */}
@@ -74,7 +74,7 @@ export default function CalculatorPage() {
             
 
             {/* Calculator Form */}
-            <div className="p-8">
+            <div className="p-8 px-1">
               <CalculatorForm mode={mode} onCalculate={handleCalculate} isLoading={isLoading} error={error} />
 
               {/* Results */}
@@ -88,8 +88,7 @@ export default function CalculatorPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 max-w-2xl mx-auto transition-colors duration-300">
             <p className="font-medium mb-2">⚠️ Importante</p>
             <p>
-              Valores de INSS e IRRF baseados nas tabelas de 2025. Esta é uma ferramenta de simulação para fins
-              educacionais.
+              Valores de INSS e IRRF baseados nas tabelas de 2025. Esta é uma ferramenta de simulação.
             </p>
           </div>
         </footer>

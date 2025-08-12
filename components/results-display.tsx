@@ -11,7 +11,7 @@ import PDFExport from "./pdf-export"
 interface ResultsDisplayProps {
   mode: CalculationMode
   results: CalculationResults[]
-  period: number
+  period?: number
 }
 
 export default function ResultsDisplay({ mode, results, period }: ResultsDisplayProps) {
@@ -23,6 +23,9 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
     const totalWithBenefits = result.hasDiscounts
       ? result.totalNetGains + result.totalBenefits + result.totalIndenization
       : result.totalGrossGains + result.totalBenefits + result.totalIndenization
+
+    const pct = typeof result.percentageOfTotal === "number" ? Math.max(0, Math.min(100, result.percentageOfTotal)) : 0
+    const percentageAmount = (totalWithBenefits * pct) / 100
 
     return (
       <div className="mt-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -37,10 +40,10 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
 
         {/* Export Button */}
         <div className="flex justify-center px-4">
-          <PDFExport mode={mode} results={results} period={period} />
+          <PDFExport mode={mode} results={results} period={period ?? result.yearlyData.length} />
         </div>
 
-        {/* Summary Card - Sem padding em mobile */}
+        {/* Summary Card */}
         <div className="mx-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 rounded-2xl p-4 md:p-8 text-white text-center">
           <h3 className="text-lg md:text-xl font-semibold mb-2">GANHO TOTAL NO PERÍODO</h3>
           <p className="text-xs md:text-sm opacity-90 mb-4">
@@ -51,9 +54,18 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
               {formatCurrency(totalWithBenefits)}
             </p>
           </div>
+
+          {/* Percentage of total (if provided) */}
+          {pct > 0 && (
+            <div className="mt-4 bg-white/15 dark:bg-black/20 rounded-lg inline-block px-3 py-2">
+              <p className="text-sm md:text-base font-medium">
+                {pct.toFixed(2)}% do total: <span className="font-bold">{formatCurrency(percentageAmount)}</span>
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Details Grid - Padding reduzido em mobile */}
+        {/* Details Grid */}
         <div className="px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 md:p-6 border border-blue-100 dark:border-blue-800">
@@ -136,7 +148,7 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
 
         {/* Detalhamento Anual */}
         {showBreakdown1 && (
-          <div className="px-4">
+          <div className="leading-3 px-0">
             <YearlyBreakdown yearlyData={result.yearlyData} hasDiscounts={result.hasDiscounts} />
           </div>
         )}
@@ -155,6 +167,12 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
 
   const difference = gain2 - gain1
 
+  const pct1 = typeof result1.percentageOfTotal === "number" ? Math.max(0, Math.min(100, result1.percentageOfTotal)) : 0
+  const pct2 = typeof result2.percentageOfTotal === "number" ? Math.max(0, Math.min(100, result2.percentageOfTotal)) : 0
+
+  const percentageAmount1 = (gain1 * pct1) / 100
+  const percentageAmount2 = (gain2 * pct2) / 100
+
   return (
     <div className="mt-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <div className="text-center px-4">
@@ -164,10 +182,10 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
 
       {/* Export Button */}
       <div className="flex justify-center px-4">
-        <PDFExport mode={mode} results={results} period={period} />
+        <PDFExport mode={mode} results={results} period={period ?? result1.yearlyData.length} />
       </div>
 
-      {/* Summary - Padding reduzido em mobile */}
+      {/* Summary */}
       <div className="px-4">
         <div
           className={`rounded-2xl p-4 md:p-8 text-center ${
@@ -218,7 +236,12 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
                   {formatCurrency(gain1)}
                 </p>
               </div>
-              <div className="text-xs md:text-sm text-indigo-600 dark:text-indigo-400 mt-2 break-words">
+              {pct1 > 0 && (
+                <div className="text-xs md:text-sm text-indigo-700 dark:text-indigo-300 mt-3 bg-white/50 dark:bg-white/10 rounded-md inline-block px-2 py-1">
+                  {pct1.toFixed(2)}% do total: <strong>{formatCurrency(percentageAmount1)}</strong>
+                </div>
+              )}
+              <div className="text-xs md:text-sm text-indigo-600 dark:text-indigo-400 mt-3 break-words">
                 <p>Férias: {formatCurrency(result1.totalVacations)}</p>
                 <p>Indenização: {formatCurrency(result1.totalIndenization)}</p>
               </div>
@@ -247,7 +270,12 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
                   {formatCurrency(gain2)}
                 </p>
               </div>
-              <div className="text-xs md:text-sm text-teal-600 dark:text-teal-400 mt-2 break-words">
+              {pct2 > 0 && (
+                <div className="text-xs md:text-sm text-teal-700 dark:text-teal-300 mt-3 bg-white/50 dark:bg-white/10 rounded-md inline-block px-2 py-1">
+                  {pct2.toFixed(2)}% do total: <strong>{formatCurrency(percentageAmount2)}</strong>
+                </div>
+              )}
+              <div className="text-xs md:text-sm text-teal-600 dark:text-teal-400 mt-3 break-words">
                 <p>Férias: {formatCurrency(result2.totalVacations)}</p>
                 <p>Indenização: {formatCurrency(result2.totalIndenization)}</p>
               </div>

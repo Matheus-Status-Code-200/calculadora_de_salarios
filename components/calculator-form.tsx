@@ -18,16 +18,11 @@ export default function CalculatorForm() {
   const [isCalculating, setIsCalculating] = useState(false)
 
   const handlePeriodChange = (value: string) => {
-    // Permitir campo vazio
     if (value === "") {
       setPeriod("")
       return
     }
-
-    // Converter para número e validar
     const numValue = Number.parseInt(value, 10)
-
-    // Só aceitar números válidos entre 1 e 80
     if (!isNaN(numValue) && numValue >= 1 && numValue <= 80) {
       setPeriod(numValue.toString())
     }
@@ -38,7 +33,6 @@ export default function CalculatorForm() {
     setIsCalculating(true)
 
     try {
-      // Validar período
       if (!period || period === "") {
         setError("Por favor, informe o período de cálculo em anos.")
         return
@@ -53,12 +47,10 @@ export default function CalculatorForm() {
       if (mode === "single") {
         const inputs = getScenarioInputs(0)
         const validation = validateInputs(inputs)
-
         if (!validation.isValid) {
           setError(validation.error)
           return
         }
-
         const result = performCalculation(periodYears, inputs)
         setResults([result])
       } else {
@@ -72,7 +64,6 @@ export default function CalculatorForm() {
           setError(`Cenário 1: ${validation1.error}`)
           return
         }
-
         if (!validation2.isValid) {
           setError(`Cenário 2: ${validation2.error}`)
           return
@@ -114,6 +105,11 @@ export default function CalculatorForm() {
       10,
     )
 
+    // Porcentagem para calcular sobre o total
+    const percentageRaw = (document.getElementById(`percentageOfTotal${scenario}`) as HTMLInputElement)?.value ?? ""
+    const percentageOfTotal =
+      percentageRaw === "" ? undefined : Math.max(0, Math.min(100, Number.parseFloat(percentageRaw)))
+
     // Coletar benefícios
     const benefitRows = document.querySelectorAll(`.benefits-container[data-scenario="${scenario}"] .benefit-row`)
     const benefits = Array.from(benefitRows)
@@ -140,12 +136,13 @@ export default function CalculatorForm() {
       benefits,
       calculateDiscounts,
       dependents,
+      percentageOfTotal,
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 md:space-y-8">
+      <div className="max-w-7xl mx-auto lg:px-8 py-6 space-y-6 md:space-y-8 sm:px-[-1px] px-[16px-] px-[-] px-[-] px-1">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">

@@ -271,6 +271,46 @@ export default function ScenarioInput({ scenario, title }: ScenarioInputProps) {
             </div>
           )}
         </div>
+
+        {/* Calcular Porcentagem do Total */}
+        <div className="border-t dark:border-gray-600 pt-4 md:pt-6">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 md:p-6 border border-gray-200 dark:border-gray-600">
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  scenario === 2 ? "bg-teal-500" : scenario === 1 ? "bg-indigo-500" : "bg-blue-500"
+                }`}
+              >
+                <span className="text-white font-bold text-sm">%</span>
+              </div>
+              <h4 className="text-sm md:text-base font-semibold text-gray-700 dark:text-gray-300">
+                Calcular Porcentagem do Total
+              </h4>
+            </div>
+
+            <label
+              htmlFor={`percentageOfTotal${scenario}`}
+              className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Porcentagem desejada do valor total (%)
+            </label>
+            <input
+              type="number"
+              id={`percentageOfTotal${scenario}`}
+              step="0.01"
+              min="0"
+              max="100"
+              className="w-full px-4 py-3 md:py-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-base md:text-lg"
+              placeholder="Ex: 20.5 (para 20,5% do total)"
+            />
+            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border-l-4 border-blue-400">
+              <p className="text-xs md:text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+                <strong>Exemplo:</strong> Se o ganho total for R$ 100.000 e você inserir 25%, será calculado R$ 25.000.
+                Útil para simular reservas de emergência, investimentos ou metas financeiras.
+              </p>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

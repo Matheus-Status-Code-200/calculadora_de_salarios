@@ -22,7 +22,7 @@ const Switch = React.forwardRef<
       className={cn(
         "block rounded-full shadow transition-transform duration-200 bg-lime-500",
         // Tamanhos responsivos
-        "max-sm:h-[12px] max-sm:w-[12px] md:h-[20px] md:w-[20px] h-5 w-5",
+        "max-sm:h-[12px] max-sm:w-[12px] md:h-[20px] md:w-[20px] h-4 w-4",
         // Movimentação do botão conforme o estado
         "data-[state=checked]:translate-x-[16px] max-sm:data-[state=checked]:translate-x-[12px] md:data-[state=checked]:translate-x-[20px]",
         "data-[state=unchecked]:translate-x-0"

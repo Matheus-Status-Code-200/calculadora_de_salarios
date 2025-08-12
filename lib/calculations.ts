@@ -158,5 +158,6 @@ export function performCalculation(years: number, inputs: CalculationInputs): Ca
     totalBenefits,
     totalIndenization,
     hasDiscounts: inputs.calculateDiscounts,
+    percentageOfTotal: inputs.percentageOfTotal,
   }
 }

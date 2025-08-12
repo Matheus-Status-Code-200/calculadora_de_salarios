@@ -14,6 +14,7 @@ export interface CalculationInputs {
   benefits: Benefit[]
   calculateDiscounts: boolean
   dependents: number
+  percentageOfTotal?: number
 }
 
 export interface YearlyData {
@@ -42,6 +43,7 @@ export interface CalculationResults {
   totalBenefits: number
   totalIndenization: number
   hasDiscounts: boolean
+  percentageOfTotal?: number
 }
 
 export type CalculationMode = "single" | "compare"
