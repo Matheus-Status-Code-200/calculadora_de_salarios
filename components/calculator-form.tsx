@@ -229,10 +229,17 @@ export default function CalculatorForm() {
             onClick={handleCalculate}
             disabled={isCalculating}
             size="lg"
-            className="w-full max-w-md px-6 md:px-8 py-3 md:py-4 text-base md:text-lg"
+            className="w-full max-w-md px-8 py-4 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            <Calculator className="w-5 h-5 mr-2" />
-            {isCalculating ? "Calculando..." : "Calcular Projeção"}
+            <Calculator className="w-6 h-6 mr-3" />
+            {isCalculating ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Calculando...
+              </>
+            ) : (
+              "CALCULAR PROJEÇÃO"
+            )}
           </Button>
         </div>
 

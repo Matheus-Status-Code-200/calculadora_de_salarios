@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, ChevronUp, Calculator } from "lucide-react"
+import { ChevronDown, ChevronUp, Calculator, TrendingUp } from "lucide-react"
 import type { CalculationMode, CalculationResults } from "@/types/calculator"
 import { formatCurrency } from "@/lib/utils"
 import YearlyBreakdown from "./yearly-breakdown"
 import ComparisonChart from "./comparison-chart"
 import PDFExport from "./pdf-export"
+import InvestmentSimulator from "./investment-simulator"
 
 interface ResultsDisplayProps {
   mode: CalculationMode
@@ -17,6 +18,7 @@ interface ResultsDisplayProps {
 export default function ResultsDisplay({ mode, results, period }: ResultsDisplayProps) {
   const [showBreakdown1, setShowBreakdown1] = useState(false)
   const [showBreakdown2, setShowBreakdown2] = useState(false)
+  const [showInvestmentSimulator, setShowInvestmentSimulator] = useState(false)
 
   if (mode === "single") {
     const result = results[0]
@@ -26,6 +28,8 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
 
     const pct = typeof result.percentageOfTotal === "number" ? Math.max(0, Math.min(100, result.percentageOfTotal)) : 0
     const percentageAmount = (totalWithBenefits * pct) / 100
+
+    const suggestedInvestmentAmount = pct > 0 ? percentageAmount : totalWithBenefits * 0.2 // 20% default if no percentage set
 
     return (
       <div className="mt-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -42,8 +46,7 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
         <div className="flex justify-center px-4">
           <PDFExport mode={mode} results={results} period={period ?? result.yearlyData.length} />
         </div>
-
-        {/* Summary Card */}
+{/* Summary Card */}
         <div className="mx-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 rounded-2xl p-4 md:p-8 text-white text-center">
           <h3 className="text-lg md:text-xl font-semibold mb-2">GANHO TOTAL NO PERÍODO</h3>
           <p className="text-xs md:text-sm opacity-90 mb-4">
@@ -64,7 +67,6 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
             </div>
           )}
         </div>
-
         {/* Details Grid */}
         <div className="px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6">
@@ -77,6 +79,8 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
               </div>
               <p className="text-xs md:text-sm text-blue-600 dark:text-blue-400 mt-1">Salário + 13º + Férias</p>
             </div>
+
+            
 
             <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3 md:p-6 border border-yellow-100 dark:border-yellow-800">
               <h3 className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2 text-sm md:text-base">Férias</h3>
@@ -152,6 +156,45 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
             <YearlyBreakdown yearlyData={result.yearlyData} hasDiscounts={result.hasDiscounts} />
           </div>
         )}
+
+        {/* Investment Opportunity Card */}
+        <div className="mx-4">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-700 rounded-2xl p-4 md:p-6 text-white">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg md:text-xl font-bold">Oportunidade de Investimento</h3>
+            </div>
+            <p className="text-sm md:text-base opacity-90 text-center mb-4">
+              Transforme seus ganhos trabalhistas em patrimônio! Simule investimentos e planeje sua aposentadoria.
+            </p>
+            <div className="text-center">
+              <p className="text-xs md:text-sm opacity-80 mb-3">
+                Sugestão: Invista {formatCurrency(suggestedInvestmentAmount)} ({pct > 0 ? `${pct.toFixed(1)}%` : "20%"}{" "}
+                do total)
+              </p>
+              <button
+                onClick={() => setShowInvestmentSimulator(!showInvestmentSimulator)}
+                className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
+              >
+                {showInvestmentSimulator ? "Ocultar Simulador" : "Simular Investimentos"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Investment Simulator Component */}
+        {showInvestmentSimulator && (
+          <div className="mx-4">
+            <InvestmentSimulator
+              suggestedAmount={suggestedInvestmentAmount}
+              onClose={() => setShowInvestmentSimulator(false)}
+            />
+          </div>
+        )}
+
+        
       </div>
     )
   }
@@ -173,6 +216,9 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
   const percentageAmount1 = (gain1 * pct1) / 100
   const percentageAmount2 = (gain2 * pct2) / 100
 
+  const betterScenario = gain2 > gain1 ? gain2 : gain1
+  const suggestedInvestmentAmount = betterScenario * 0.2 // 20% of better scenario
+
   return (
     <div className="mt-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <div className="text-center px-4">
@@ -183,41 +229,6 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
       {/* Export Button */}
       <div className="flex justify-center px-4">
         <PDFExport mode={mode} results={results} period={period ?? result1.yearlyData.length} />
-      </div>
-
-      {/* Summary */}
-      <div className="px-4">
-        <div
-          className={`rounded-2xl p-4 md:p-8 text-center ${
-            Math.abs(difference) < 0.01
-              ? "bg-gradient-to-r from-gray-600 to-gray-700 dark:from-gray-700 dark:to-gray-800 text-white"
-              : difference > 0
-                ? "bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-700 dark:to-emerald-700 text-white"
-                : "bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-700 dark:to-blue-700 text-white"
-          }`}
-        >
-          {Math.abs(difference) < 0.01 ? (
-            <h3 className="text-xl md:text-2xl font-bold">Os cenários são equivalentes!</h3>
-          ) : difference > 0 ? (
-            <>
-              <h3 className="text-xl md:text-2xl font-bold mb-2">Cenário 2 é mais vantajoso!</h3>
-              <div className="break-words">
-                <p className="text-lg md:text-xl">
-                  Rende <strong>{formatCurrency(difference)}</strong> a mais no período
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <h3 className="text-xl md:text-2xl font-bold mb-2">Cenário 1 é mais vantajoso!</h3>
-              <div className="break-words">
-                <p className="text-lg md:text-xl">
-                  Rende <strong>{formatCurrency(Math.abs(difference))}</strong> a mais no período
-                </p>
-              </div>
-            </>
-          )}
-        </div>
       </div>
 
       {/* Comparison Grid */}
@@ -290,6 +301,77 @@ export default function ResultsDisplay({ mode, results, period }: ResultsDisplay
               {showBreakdown2 ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Investment Opportunity Card */}
+      <div className="mx-4">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-700 rounded-2xl p-4 md:p-6 text-white">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg md:text-xl font-bold">Simule Investimentos</h3>
+          </div>
+          <p className="text-sm md:text-base opacity-90 text-center mb-4">
+            Use o melhor cenário para planejar seus investimentos e multiplicar seu patrimônio!
+          </p>
+          <div className="text-center">
+            <p className="text-xs md:text-sm opacity-80 mb-3">
+              Sugestão: Invista {formatCurrency(suggestedInvestmentAmount)} (20% do melhor cenário)
+            </p>
+            <button
+              onClick={() => setShowInvestmentSimulator(!showInvestmentSimulator)}
+              className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
+            >
+              {showInvestmentSimulator ? "Ocultar Simulador" : "Simular Investimentos"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Investment Simulator Component */}
+      {showInvestmentSimulator && (
+        <div className="mx-4">
+          <InvestmentSimulator
+            suggestedAmount={suggestedInvestmentAmount}
+            onClose={() => setShowInvestmentSimulator(false)}
+          />
+        </div>
+      )}
+
+      {/* Summary */}
+      <div className="px-4">
+        <div
+          className={`rounded-2xl p-4 md:p-8 text-center ${
+            Math.abs(difference) < 0.01
+              ? "bg-gradient-to-r from-gray-600 to-gray-700 dark:from-gray-700 dark:to-gray-800 text-white"
+              : difference > 0
+                ? "bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-700 dark:to-emerald-700 text-white"
+                : "bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-700 dark:to-blue-700 text-white"
+          }`}
+        >
+          {Math.abs(difference) < 0.01 ? (
+            <h3 className="text-xl md:text-2xl font-bold">Os cenários são equivalentes!</h3>
+          ) : difference > 0 ? (
+            <>
+              <h3 className="text-xl md:text-2xl font-bold mb-2">Cenário 2 é mais vantajoso!</h3>
+              <div className="break-words">
+                <p className="text-lg md:text-xl">
+                  Rende <strong>{formatCurrency(difference)}</strong> a mais no período
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl md:text-2xl font-bold mb-2">Cenário 1 é mais vantajoso!</h3>
+              <div className="break-words">
+                <p className="text-lg md:text-xl">
+                  Rende <strong>{formatCurrency(Math.abs(difference))}</strong> a mais no período
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
