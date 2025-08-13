@@ -35,62 +35,66 @@ export default function CalculatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20 transition-colors duration-300">
-      <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20 transition-colors duration-300 mobile-safe">
+      <div className="mobile-container py-4 md:py-8">
         {/* Header */}
-        <div className="text-center mb-12 relative">
+        <div className="text-center mb-8 md:mb-12 relative">
           {/* Theme Toggle */}
           <div className="absolute top-0 right-0">
             <ThemeToggle />
           </div>
 
-          <div className="flex justify-center items-center gap-4 mb-6">
-            <div className="p-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl shadow-lg">
-              <Calculator className="w-10 h-10 text-white" />
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="p-3 md:p-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl shadow-lg">
+              <Calculator className="w-8 h-8 md:w-10 md:h-10 text-white" />
             </div>
-            <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent break-words">
               Calculadora Trabalhista
             </h1>
           </div>
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-base md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-6 md:mb-8 px-2">
             Simule e compare cenários de carreira com cálculos precisos de INSS, IRRF, FGTS e benefícios
           </p>
 
           {/* Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto mb-6 md:mb-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Projeções Precisas</h3>
+                <h3 className="font-semibold text-sm md:text-base text-gray-800 dark:text-gray-200">
+                  Projeções Precisas
+                </h3>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                 Cálculos detalhados ano a ano com tabelas atualizadas de 2025
               </p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Users className="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Comparação Avançada</h3>
+                <h3 className="font-semibold text-sm md:text-base text-gray-800 dark:text-gray-200">
+                  Comparação Avançada
+                </h3>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                 Compare diferentes cenários de carreira lado a lado
               </p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 sm:col-span-2 md:col-span-1">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
                 </div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Relatórios PDF</h3>
+                <h3 className="font-semibold text-sm md:text-base text-gray-800 dark:text-gray-200">Relatórios PDF</h3>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                 Exporte relatórios profissionais com gráficos e análises
               </p>
             </div>
@@ -99,7 +103,7 @@ export default function CalculatorPage() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl md:rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
             {/* Calculator Form */}
             <div className="p-1">
               <CalculatorForm mode={mode} onCalculate={handleCalculate} isLoading={isLoading} error={error} />
@@ -111,13 +115,13 @@ export default function CalculatorPage() {
         </div>
 
         {/* Footer */}
-        <footer className="text-center mt-12">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 max-w-3xl mx-auto transition-colors duration-300">
+        <footer className="text-center mt-8 md:mt-12">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 dark:border-gray-700 max-w-3xl mx-auto transition-colors duration-300">
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
-              <p className="font-semibold text-gray-800 dark:text-gray-200">Importante</p>
+              <p className="font-semibold text-sm md:text-base text-gray-800 dark:text-gray-200">Importante</p>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
               Valores de INSS e IRRF baseados nas tabelas oficiais de 2025. Esta é uma ferramenta de simulação para fins
               educacionais e de planejamento.
             </p>
